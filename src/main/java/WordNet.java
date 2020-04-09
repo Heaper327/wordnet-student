@@ -1,33 +1,126 @@
+import java.util.HashMap;
+
+import edu.princeton.cs.algs4.Bag;
+import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.In;
+
 public class WordNet {
 
-   // constructor takes the name of the two input files
-   public WordNet(String synsets, String hypernyms) {
-     
-   }
+  /**
+   * A mapping from the nouns to the corresponding synsets.
+   */
+  private HashMap<String, Bag<Integer>> nounsToSynsets;
+  /**
+   * A mapping from the synsets to the corresponding nouns.
+   */
+  private HashMap<Integer, Bag<String>> synsetsToNouns;
+  /**
+   * A directed acyclic graph of the synsets based on hypernyms relationship.
+   */
+  private Digraph wordGraph;
+  /**
+   * A SAP of the wordGraph.
+   */
+  private SAP wordSAP;
 
-   // returns all WordNet nouns
-   public Iterable<String> nouns() {
-     return null;
-   }
+  /**
+   * Constructor that takes the name of two input files.
+   * @param synsets the name of the synsets input file.
+   * @param hypernyms the name of the hypernyms input file.
+   */
+  public WordNet(String synsets, String hypernyms) {
 
-   // is the word a WordNet noun?
-   public boolean isNoun(String word) {
-     return false;
-   }
+    In reader = new In(synsets);
+    synsetsToNouns = new HashMap<Integer, Bag<String>>();
+    nounsToSynsets = new HashMap<String, Bag<Integer>>();
 
-   // distance between nounA and nounB (defined below)
-   public int distance(String nounA, String nounB) {
-     return 0;
-   }
+    int numSynsets = 0;
 
-   // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
-   // in a shortest ancestral path (defined below)
-   public String sap(String nounA, String nounB) {
-     return null;
-   }
+    while (reader.hasNextLine()) {
+      /*
+       * first token is the id of the synset
+       * second token is the nouns
+       * third token is the definition
+       */
+      String[] tokens = reader.readLine().split(",");
 
-   // do unit testing of this class
-   public static void main(String[] args) {
-     
-   }
+      // store the id of the current synset
+      int id = Integer.parseInt(tokens[0]);
+
+      // construct the bag of nouns of the current synset
+      Bag<String> nouns = new Bag<String>();
+      synsetsToNouns.put(id, nouns);
+
+      /*
+       * read all the nouns in this synset
+       * 1. add these nouns to the bag of nouns of this synset
+       * 2. add this synset to the bag of synsets of these nouns
+       */
+      for (String curNoun: tokens[1].split(" ")) {
+        nouns.add(curNoun);
+        if (!nounsToSynsets.containsKey(curNoun)) {
+          nounsToSynsets.put(curNoun, new Bag<Integer>());
+        }
+        nounsToSynsets.get(curNoun).add(id);
+      }
+
+      numSynsets++;
+    }
+
+    // construct wordGraph based on the number of synsets
+    wordGraph = new Digraph(numSynsets);
+
+    // use the reader to read the hypernyms file
+    reader = new In(hypernyms);
+
+    // create a Digraph of size number of lines in the synset file
+    while (reader.hasNextLine()) {
+      // grab the current line
+      /*
+       * first token is the current synset
+       * second to last tokens are its hypernyms
+       */
+      String[] tokens = reader.readLine().split(",");
+
+      // store the id of the current synset
+      int id = Integer.parseInt(tokens[0]);
+
+      // read its hypernyms and add the edges into the digraph
+      for (int i = 1; i < tokens.length; i++) {
+        int hypernym = Integer.parseInt(tokens[i]);
+        wordGraph.addEdge(id, hypernym);
+      }
+    }
+
+    // create a SAP based of wordGraph
+    wordSAP = new SAP(wordGraph);
+  }
+
+  // returns all WordNet nouns
+  public Iterable<String> nouns() {
+    return null;
+  }
+
+  // is the word a WordNet noun?
+  public boolean isNoun(String word) {
+    return false;
+  }
+
+  // distance between nounA and nounB (defined below)
+  public int distance(String nounA, String nounB) {
+    return 0;
+  }
+
+  // a synset (second field of synsets.txt) that is the common ancestor of nounA
+  // and nounB
+  // in a shortest ancestral path (defined below)
+  public String sap(String nounA, String nounB) {
+    // return ALL the nouns of the synset in synsets.txt format (separated by spaces)
+    return null;
+  }
+
+  // do unit testing of this class
+  public static void main(String[] args) {
+
+  }
 }
