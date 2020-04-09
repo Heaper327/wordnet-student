@@ -96,27 +96,39 @@ public class WordNet {
     wordSAP = new SAP(wordGraph);
   }
 
-  // returns all WordNet nouns
+  /**
+   * return an iterable list of all nouns in the WordNet.
+   * @return an iterable list of all nouns
+   */
   public Iterable<String> nouns() {
-    return null;
+    return nounsToSynsets.keySet();
   }
 
-  // is the word a WordNet noun?
+  /**
+   * determine whether a noun is in the WordNet or not.
+   * @param word the noun to check
+   * @return true if the noun is in the WordNet, false otherwise
+   */
   public boolean isNoun(String word) {
-    return false;
+    return nounsToSynsets.keySet().contains(word);
   }
 
   // distance between nounA and nounB (defined below)
   public int distance(String nounA, String nounB) {
-    return 0;
+    return wordSAP.length(nounsToSynsets.get(nounA), nounsToSynsets.get(nounB));
   }
 
   // a synset (second field of synsets.txt) that is the common ancestor of nounA
   // and nounB
   // in a shortest ancestral path (defined below)
   public String sap(String nounA, String nounB) {
-    // return ALL the nouns of the synset in synsets.txt format (separated by spaces)
-    return null;
+    int synset = wordSAP.ancestor(nounsToSynsets.get(nounA), nounsToSynsets.get(nounB));
+    StringBuilder sb = new StringBuilder();
+    for (String noun: synsetsToNouns.get(synset)) {
+      sb.append(noun + " ");
+    }
+    // remove the extra space after the last noun
+    return sb.substring(0, sb.length() - 1);
   }
 
   // do unit testing of this class
